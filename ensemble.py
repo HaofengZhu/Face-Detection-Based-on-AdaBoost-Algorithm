@@ -17,10 +17,7 @@ class AdaBoostClassifier:
         self.n_weakers_limit=n_weakers_limit
         self.classifiers = []
         self.alphas = []
-    def is_good_enough(self):
-        '''Optional'''
-        pass
-
+ 
     def fit(self,X,y):
         '''Build a boosted classifier from the training set (X, y).
 
@@ -35,22 +32,24 @@ class AdaBoostClassifier:
         for m in range(M):
             #e_m为训练集的分类误差率
             #w_m为每个sample的权值
-            #alpha_m为每个分类器的权重
+            #alpha为每个分类器的权值
             classifier_m = self.classifier()
-            classifier_m.fit(X,y,sample_weight=w_m)
+            classifier_m.fit(X,y)
             y_predict=classifier_m.predict(X)
-            loss=0
+            e_m=0
             for i in range(len(y_predict)):
                 if y_predict[i] != y[i]:
-                    loss += 1
-            if loss==0:
+                    e_m += 1*w_m[i]
+            if e_m>0.5:
+                break
+            #如果基分类器足够好则不需要进一步训练后面的分类器
+            if e_m==0:
                 self.classifiers.append(classifier_m)
                 sum=0
                 for a in self.alphas:
                     sum+=a
                 self.alphas.append(1-sum)
                 break
-            e_m = loss * w_m[m]
             alpha_m = 1 / 2 * np.log((1 - e_m) / e_m)
             w_m = w_m * np.exp(-alpha_m * y * classifier_m.predict(X))
             z_m = np.sum(w_m)
@@ -92,6 +91,7 @@ class AdaBoostClassifier:
         for i in range(len(results)):
             results[i]=((results[i] > 0) - 0.5) * 2
         return results
+        #return ((results > 0) - 0.5) * 2
 
     @staticmethod
     def save(model, filename):
