@@ -17,7 +17,10 @@ class AdaBoostClassifier:
         self.n_weakers_limit=n_weakers_limit
         self.classifiers = []
         self.alphas = []
- 
+    def is_good_enough(self):
+        '''Optional'''
+        pass
+
     def fit(self,X,y):
         '''Build a boosted classifier from the training set (X, y).
 
@@ -89,9 +92,9 @@ class AdaBoostClassifier:
         '''
         results = self.predict_scores(X)
         for i in range(len(results)):
-            results[i]=((results[i] > 0) - 0.5) * 2
+            results[i]=((results[i] >= threshold) - 0.5) * 2
         return results
-        #return ((results > 0) - 0.5) * 2
+        #return ((results >= threshold) - 0.5) * 2
 
     @staticmethod
     def save(model, filename):
